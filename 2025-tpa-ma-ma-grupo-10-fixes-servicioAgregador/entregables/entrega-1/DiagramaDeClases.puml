@@ -1,0 +1,226 @@
+@startuml
+
+class Hecho{
+    - private HechoValueObject infoHecho
+    - private boolean tieneContenidoMultimedia
+    - private LocalDate fechaDeCarga
+    - private boolean eliminado
+    - private Origen origen
+    - private Set<String> etiquetas
+
+'    //METODOS
+    + public admitirSolicitudEliminacion()
+}
+
+class Categoria {
+    -private String nombre;
+    +public boolean esIgualA(Categoria);
+}
+
+enum Origen {
+    MANUAL,
+    PORCONTRIBUYENTE
+}
+
+enum Estado{
+    ACEPTADA,
+    RECHAZADA,
+    PENDIENTE
+}
+
+Hecho --> Categoria
+Hecho --> Origen
+Hecho --> HechoValueObject
+
+
+' FUENTES y HECHOS
+
+interface Fuente <<interfaz>>{
+    + public void leerDataSets()
+}
+
+class FuenteEstatica{
+    - private ImportadorCSV importador
+    - private Set<Hecho> hechos
+
+    + public void cargarHechos()
+    + public Set<Hecho> obtenerHechos()
+}
+
+class HechoValueObject {
+    - private String titulo
+    - private Categoria categoria
+    - private Ubicacion ubicacion
+    - private LocalDateTime fechaAcontecimiento
+
+    + boolean esIgualA(HechoValueObject unHecho)
+}
+
+class ColeccionHechoValueObject {
+    - private List<HechoValueObject> hechosDataset;
+    + public void borrarRepetidos()
+    + public Set<Hechos> getHechos();
+}
+
+
+' IMPORTADOR CSV
+
+class ImportadorCSV {
+    -private String pathCSV;
+    +public ColeccionHechoValueObject importarHechosDataset();
+}
+
+class LectorFilaCSV {
+    +public List<FormatoFilaCSV> obtenerFilasCSV(String rutaArchivo);
+}
+
+class FormatoFilaCSV {
+    -private List<String> filaCSV;
+    +public String getFechaAcontecimiento();
+    +public String getTitulo();
+    +public String getDescripcion();
+}
+
+FuenteEstatica ..|> Fuente
+FuenteEstatica ..> ColeccionHechoValueObject
+ColeccionHechoValueObject --> "*" HechoValueObject
+ImportadorCSV ..> LectorFilaCSV
+LectorFilaCSV ..> "*" FormatoFilaCSV
+Fuente ..> "*" Hecho
+FuenteEstatica --> ImportadorCSV
+
+class Coleccion{
+    - private String titulo
+    - private String descripcion
+    - private Fuente fuente
+    - private Criterio criterioPertenencia
+
+'    Memoria para hechos eliminados
+
+    public Set<Hecho> busquedaCon(Filtro ... filtros)
+}
+
+class Criterio{
+    - private Set<Filtro> filtros
+
+    +  public Set<Hecho> getHechosFiltrados(Set<Hecho> hechos)
+}
+
+Coleccion --> Criterio
+Coleccion --> Fuente
+Criterio --> "*" Filtro
+
+
+'FILTROS
+
+abstract class Filtro {
+    + public Set<Hecho> apply(Set<Hecho> hechos)
+    # protected boolean hechoCumple(Hecho unHecho)
+}
+
+class FiltroPorCategoria {
+    - private Categoria categoria
+
+    # protected boolean hechoCumple(Hecho unHecho)
+}
+
+class FiltroPorDescripcion {
+# protected String obtenerUnTipoString(Hecho unHecho)
+}
+
+abstract class FiltroPorFecha {
+    -private LocalDate desde
+    -private LocalDate hasta
+    # protected boolean hechoCumple(Hecho hecho)
+    # protected LocalDate obtenerUnTipoFecha(Hecho unHecho)
+}
+
+class FiltroPorFechaAcontecimiento {
+    # protected LocalDate obtenerUnTipoFecha(Hecho unHecho)
+}
+
+class FiltroPorFechaCarga {
+    # protected LocalDate obtenerUnTipoFecha(Hecho unHecho)
+}
+
+abstract class FiltroPorString {
+    - private String cadenaAComparar
+    # protected boolean hechoCumple(Hecho unHecho)
+    # protected String obtenerUnTipoString(Hecho unHecho)
+}
+
+class FiltroPorTitulo {
+   # protected String obtenerUnTipoString(Hecho unHecho)
+}
+
+class FiltroUbicacion {
+    - private Ubicacion ubicacion
+
+    # protected boolean hechoCumple(Hecho unHecho)
+}
+
+FiltroPorTitulo --|> FiltroPorString
+FiltroPorDescripcion --|> FiltroPorString
+
+
+FiltroPorFechaAcontecimiento --|> FiltroPorFecha
+FiltroPorFechaCarga --|> FiltroPorFecha
+
+
+class FiltroOrigen {
+    - private Origen origen
+
+    # protected boolean hechoCumple(Hecho unHecho)
+}
+
+class FiltroContenidoMultimedia {
+    - private boolean tieneContenidoMultimedia
+
+    # protected boolean hechoCumple(Hecho unHecho)
+}
+
+FiltroPorCategoria --|> Filtro
+FiltroPorFecha --|> Filtro
+FiltroPorString --|> Filtro
+FiltroOrigen --|> Filtro
+FiltroContenidoMultimedia --|> Filtro
+FiltroUbicacion --|> Filtro
+
+
+class Solicitud {
+    - private Hecho hecho
+    - private Estado estado
+    - private String justificacion
+}
+
+
+Solicitud --> Hecho
+Solicitud --> Estado
+
+class Usuario{
+    - private String nombre
+    - private String apellido
+    - private Integer edad
+    - private Rol rol
+}
+
+Usuario --> Rol
+
+interface Rol{
+
+}
+
+class Administrador extends Rol {
+
+}
+
+' anonimo
+class Visualizador extends Rol{
+
+}
+
+class Contribuyente extends Rol{
+
+}
+
+@enduml

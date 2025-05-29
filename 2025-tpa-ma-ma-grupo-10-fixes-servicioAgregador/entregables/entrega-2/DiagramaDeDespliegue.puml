@@ -1,0 +1,46 @@
+@startuml
+'https://plantuml.com/deployment-diagram
+
+actor usuario
+
+node servicioAgregador {
+component ColeccionService
+component ColeccionController
+component ConexionFuenteService
+component ColeccionRepository
+}
+
+ColeccionController -(0- ColeccionService
+ColeccionService -(0- ConexionFuenteService
+ConexionFuenteService -(0- ColeccionRepository
+usuario -(0- ColeccionController
+
+
+node servicioFuenteDinamica {
+component HechoControllerDinamica
+component HechoServiceDinamica
+component HechoRepositoryDinamica
+}
+node servicioFuenteEstatica {
+component HechoControllerEstatica
+component HechoServiceEstatica
+component HechoRepositoryEstatica
+}
+node servicioFuenteProxy {
+component HechoControllerProxy
+component HechoServiceProxy
+}
+
+
+component InstanciaMetaMapa
+
+HechoServiceProxy -(0- InstanciaMetaMapa
+
+
+ConexionFuenteService -(0- servicioFuenteDinamica
+ConexionFuenteService -(0- servicioFuenteEstatica
+ConexionFuenteService -(0- servicioFuenteProxy
+
+
+
+@enduml
